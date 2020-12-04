@@ -30,22 +30,64 @@ const CartProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     async function loadProducts(): Promise<void> {
-      // TODO LOAD ITEMS FROM ASYNC STORAGE
+      const loadedProdutcts = await AsyncStorage.getItem('@GoBarber:products');
+
+      if (!loadedProdutcts) {
+        return;
+      }
+
+      setProducts(JSON.parse(loadedProdutcts));
     }
 
     loadProducts();
   }, []);
 
   const addToCart = useCallback(async product => {
-    // TODO ADD A NEW ITEM TO THE CART
+    setProducts(current => {
+      if (!current) {
+        return current;
+      }
+
+      const newProducts = [...current];
+
+      const existingProduct = newProducts.find(prod => prod.id === product.id);
+      if (existingProduct) {
+        existingProduct.quantity += 1;
+      } else {
+        newProducts.push({ ...product, quantity: 1 });
+      }
+
+      AsyncStorage.setItem('@GoBarber:products', JSON.stringify(newProducts));
+      return newProducts;
+    });
   }, []);
 
   const increment = useCallback(async id => {
-    // TODO INCREMENTS A PRODUCT QUANTITY IN THE CART
+    setProducts(current => {
+      const newProducts = [...current];
+
+      const product = newProducts.find(prod => prod.id === id);
+      if (product) {
+        product.quantity += 1;
+      }
+
+      AsyncStorage.setItem('@GoBarber:products', JSON.stringify(newProducts));
+      return newProducts;
+    });
   }, []);
 
   const decrement = useCallback(async id => {
-    // TODO DECREMENTS A PRODUCT QUANTITY IN THE CART
+    setProducts(current => {
+      const newProducts = [...current];
+
+      const product = newProducts.find(prod => prod.id === id);
+      if (product) {
+        product.quantity -= 1;
+      }
+
+      AsyncStorage.setItem('@GoBarber:products', JSON.stringify(newProducts));
+      return newProducts;
+    });
   }, []);
 
   const value = React.useMemo(
